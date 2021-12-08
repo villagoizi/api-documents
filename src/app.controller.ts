@@ -1,12 +1,12 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Post } from '@nestjs/common';
 import { AppService } from './app.service';
-
+import { DocumentRequest } from './interfaces/document.request';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Post()
+  buildDocument(request: DocumentRequest) {
+    return this.appService.buildDocument(request.variables, 'entro al archivo');
   }
 }
