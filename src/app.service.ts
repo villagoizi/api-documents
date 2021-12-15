@@ -3,11 +3,13 @@ import * as path from 'path';
 import * as fs from 'fs';
 import FormData from 'form-data';
 import { UploadService } from './upload/upload.service';
-import Docxtemplater from 'docxtemplater';
 import { UploadResponse } from './interfaces/upload.response';
-import JSZip from 'jszip';
+import * as pizzip from 'pizzip';
+import { promisify } from 'util';
+// @ts-ignore
+const Docxtemplater: any = require('docxtemplater');
 
-const OUTPUT_PATH = path.join(__dirname, '../../outputs/output.docx');
+const OUTPUT_PATH = path.join(__dirname, '../outputs/output.docx');
 
 @Injectable()
 export class AppService {
@@ -17,30 +19,51 @@ export class AppService {
     return 'Hello World!';
   }
 
-  async buildDocument(variables: any, idTemplate: string): Promise<boolean> {
-    console.log(idTemplate);
-    // const content = fs.readFileSync(
-    //   path.join(__dirname, `../../templates/tag-example-${idTemplate}.docx`),
-    //   'binary',
-    // );
+  async buildDocument(
+    variables: any,
+    template: Express.Multer.File,
+  ): Promise<string> {
+    const content = fs.readFileSync(
+      path.join(__dirname, `../${template.path}`),
+      'binary',
+    );
+    const zip = new pizzip(content);
+    const doc = new Docxtemplater(zip, {
+      paragraphLoop: true,
+      linebreaks: true,
+    });
     try {
-      //   const jszip = new JSZip(content);
-      //   const doc = new Docxtemplater(jszip, {
-      //     paragraphLoop: true,
-      //     linebreaks: true,
-      //   });
-      //   doc.setData(variables);
-      //   doc.render();
-      //   const buf = doc.getZip().generate({ type: 'nodebuffer' });
-      // fs.writeFileSync(OUTPUT_PATH, buf, 'utf-8');
+      doc.setData(JSON.parse(variables));
+      doc.render();
+      const buf = doc.getZip().generate({ type: 'nodebuffer' });
+      fs.writeFileSync(OUTPUT_PATH, buf, 'utf-8');
+      this.clearFolderTemp();
       // const upload = (await this.upload(OUTPUT_PATH)) as unknown;
       // const hash = this._parseName(upload as UploadResponse);
       // TODO: send hash to normalizador.
     } catch (error) {
-      return false;
+      console.log(error);
+      return error;
     }
     // TODO: Generate services to send hash to normalizador
-    return true;
+    return (await this.getFile(OUTPUT_PATH)).toString();
+  }
+
+  clearFolderTemp() {
+    fs.readdir(path.join(__dirname, `/temp`), (err, files) => {
+      if (err) throw err;
+
+      for (const file of files) {
+        fs.unlink(path.join(path.join(__dirname, `/temp`), file), (err) => {
+          if (err) throw err;
+        });
+      }
+    });
+  }
+
+  async getFile(path: string): Promise<string | Buffer> {
+    const readFile = promisify(fs.readFile);
+    return readFile(path, 'utf8');
   }
 
   async upload(filepath: string) {
