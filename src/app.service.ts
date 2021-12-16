@@ -1,32 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as path from 'path';
 import * as fs from 'fs';
-import FormData from 'form-data';
-import { UploadService } from './upload/upload.service';
 import { UploadResponse } from './interfaces/upload.response';
 import * as pizzip from 'pizzip';
 import { promisify } from 'util';
 // @ts-ignore
 const Docxtemplater: any = require('docxtemplater');
 
-const OUTPUT_PATH = path.join(__dirname, '../outputs/output.docx');
+const DIST = path.join(__dirname, `../`);
+const OUTPUT_FOLDER = path.join(__dirname, '../outputs');
 
 @Injectable()
 export class AppService {
-  constructor(private uploaderService: UploadService) {}
-
-  getHello(): string {
-    return 'Hello World!';
-  }
+  private readonly logger = new Logger(AppService.name);
 
   async buildDocument(
     variables: any,
     template: Express.Multer.File,
   ): Promise<string> {
-    const content = fs.readFileSync(
-      path.join(__dirname, `../${template.path}`),
-      'binary',
+    const OUTPUT_PATH = path.join(
+      __dirname,
+      `../outputs/${template.originalname}`,
     );
+    const content = fs.readFileSync(`${DIST}${template.path}`, 'binary');
     const zip = new pizzip(content);
     const doc = new Docxtemplater(zip, {
       paragraphLoop: true,
@@ -37,33 +33,36 @@ export class AppService {
       doc.render();
       const buf = doc.getZip().generate({ type: 'nodebuffer' });
       fs.writeFileSync(OUTPUT_PATH, buf, 'utf-8');
-      this.clearFolderTemp();
+      this.clearFolderTemp(path.join(__dirname, `/temp`));
       // const upload = (await this.upload(OUTPUT_PATH)) as unknown;
       // const hash = this._parseName(upload as UploadResponse);
       // TODO: send hash to normalizador.
     } catch (error) {
-      console.log(error);
+      this.logger.error(error);
       return error;
     }
     // TODO: Generate services to send hash to normalizador
+    this.logger.log(`archivo ${template.originalname} generado. `);
     return (await this.getFile(OUTPUT_PATH)).toString();
-  }
-
-  clearFolderTemp() {
-    fs.readdir(path.join(__dirname, `/temp`), (err, files) => {
-      if (err) throw err;
-
-      for (const file of files) {
-        fs.unlink(path.join(path.join(__dirname, `/temp`), file), (err) => {
-          if (err) throw err;
-        });
-      }
-    });
   }
 
   async getFile(path: string): Promise<string | Buffer> {
     const readFile = promisify(fs.readFile);
-    return readFile(path, 'utf8');
+    const file = readFile(path, 'utf8');
+    this.clearFolderTemp(OUTPUT_FOLDER);
+    return file;
+  }
+
+  clearFolderTemp(folder: string) {
+    fs.readdir(folder, (err, files) => {
+      if (err) throw err;
+
+      for (const file of files) {
+        fs.unlink(path.join(folder, file), (err) => {
+          if (err) throw err;
+        });
+      }
+    });
   }
 
   async upload(filepath: string) {

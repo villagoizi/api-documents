@@ -9,11 +9,11 @@ import { AppService } from './app.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentRequest } from './interfaces/document.request';
 import { diskStorage } from 'multer';
-@Controller()
+@Controller('document')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Post()
+  @Post('create')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
