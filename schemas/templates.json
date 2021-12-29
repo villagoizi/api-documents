@@ -1,0 +1,119 @@
+[
+  {
+    "id": "RECHAZO_APELACION_POR NO_SUBSANAR_OBSERVACIONES",
+    "name": "RECHAZO APELACIÓN POR NO SUBSANAR OBSERVACIONES",
+    "groups": [
+      {
+        "title": "Inadmisible segun",
+        "fields": [
+          {
+            "name": "Numero Resolucion Recurso",
+            "id": "NUMERO_RESOLUCION_RECURSO"
+          },
+          {
+            "name": "Fecha Resolucion Recurso",
+            "id": "FECHA_RESOLUCION_RECURSO"
+          }
+        ]
+      },
+      {
+        "title": "Resuelve",
+        "fields": [
+          { "name": "Nombre Apelante", "id": "NOMBRE_APELANTE" },
+          { "name": "Numero Resolucion", "id": "NUMERO_RESOLUCION" },
+          { "name": "Fecha Resolucion", "id": "FECHA_RESOLUCION" }
+        ]
+      }
+    ],
+    "hasGroup": true
+  },
+  {
+    "id": "INADMISIBLE_APELACION",
+    "name": "INADMISIBLE APELACIÓN",
+    "groups": [
+      {
+        "title": "",
+        "fields": [{ "name": "Nombre Apelante", "id": "NOMBRE_APELANTE" }]
+      }
+    ],
+    "hasGroup": true
+  },
+  {
+    "id": "MANTIENE_VIGENTES_MEDIDAS_DE_PROTECCION",
+    "name": "MANTIENE VIGENTES MEDIDAS DE PROTECCION",
+    "groups": [
+      {
+        "title": "Datos Denunciado",
+        "fields": [{ "name": "Nombre denunciado", "id": "NOMBRE_DENUNCIADO" }]
+      },
+      {
+        "title": "Datos Disposicion",
+        "fields": [
+          { "name": "Numero Disposicion", "id": "NUMERO_DISPOSICIONMPF" },
+          { "name": "Fecha Disposicion", "id": "FECHA_DISPOSICIONMPF" }
+        ]
+      },
+      {
+        "title": "Datos Victima",
+        "fields": [{ "name": "Nombre Victima", "id": "NOMBRE_VICTIMA" }]
+      },
+      {
+        "title": "Informes",
+        "fields": [
+          {
+            "name": "Numero informe psicologico",
+            "id": "NUMERO_INFORMEPSICOLOGICO"
+          },
+          { "name": "Numero informe social", "id": "NUMERO_INFORMESOCIAL" },
+          { "name": "Fecha denuncia", "id": "FECHA_DENUNCIA" }
+        ]
+      },
+      {
+        "title": "Resuelve",
+        "fields": [
+          { "name": "Numero Resolucion", "id": "NUMERO_RESOLUCION" },
+          { "name": "Fecha Resolucion", "id": "FECHA_RESOLUCION" }
+        ]
+      }
+    ],
+    "hasGroup": true
+  },
+  {
+    "id": "IMPROCEDENTE_APELACION_POR_EXTEMPORANEA",
+    "name": "IMPROCEDENTE APELACIÓN POR EXTEMPORANEA",
+    "groups": [
+      {
+        "title": "",
+        "fields": [
+          { "name": "Nombre Apelante", "id": "NOMBRE_APELANTE" },
+          { "name": "Fecha Recurso", "id": "FECHA_RECURSO" }
+        ]
+      },
+      {
+        "title": "Resuelve",
+        "fields": [
+          { "name": "Numero Resolucion", "id": "NUMERO_RESOLUCION" },
+          { "name": "Fecha Resolucion", "id": "FECHA_RESOLUCION" }
+        ]
+      }
+    ],
+    "hasGroup": true
+  },
+  {
+    "id": "CONCEDE_APELACION",
+    "name": "CONCEDE APELACIÓN",
+    "groups": [
+      {
+        "title": "Apelante",
+        "fields": [{ "name": "Nombre Apelante", "id": "NOMBRE_APELANTE" }]
+      },
+      {
+        "title": "Resuelve",
+        "fields": [
+          { "name": "Numero Resolucion", "id": "NUMERO_RESOLUCION" },
+          { "name": "Fecha Resolucion", "id": "FECHA_RESOLUCION" }
+        ]
+      }
+    ]
+  }
+]

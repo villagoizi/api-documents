@@ -1,13 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { UploadFileDto, UploadResponse } from '../interfaces/upload.response';
 
 @Injectable()
 export class UploadService {
   constructor(@Inject('UPLOAD_SERVICE') private client: ClientProxy) {}
 
-  async upload(file: Express.Multer.File) {
+  async uploadInternal(file: UploadFileDto) {
     const obs = await this.client
-      .send<string>('upload:create', file)
+      .send<UploadResponse>('upload:createInternal', file)
       .toPromise();
     return obs;
   }

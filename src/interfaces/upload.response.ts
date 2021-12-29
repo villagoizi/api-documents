@@ -1,7 +1,13 @@
 export interface UploadResponse {
   hash: string;
-  extension: string;
-  base64?: string;
-  message?: string;
-  id?: string;
+  typeFile: string;
+  url: string;
+  rootPath: string;
+  originalName: string;
+}
+
+export interface UploadFileDto {
+  typeFile: string;
+  base64: string;
+  name: string;
 }

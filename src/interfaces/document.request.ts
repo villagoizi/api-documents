@@ -1,3 +1,43 @@
 export interface DocumentRequest {
   variables: any;
 }
+
+export interface SchemaRequest {
+  name: string;
+}
+
+export interface GeneralSchema {
+  id: TemplatesAvailables;
+  name: string;
+  hasGroup: boolean;
+  groups: Array<FieldGroupSchema>;
+}
+export type FieldGroupSchema = {
+  title: string;
+  fields: Array<FieldSchema>;
+};
+export type FieldSchema = { name: string; id: Variables };
+
+export type TemplatesAvailables =
+  | 'RECHAZO_APELACION_POR NO_SUBSANAR_OBSERVACIONES'
+  | 'INADMISIBLE_APELACION'
+  | 'MANTIENE_VIGENTES_MEDIDAS_DE_PROTECCION'
+  | 'IMPROCEDENTE_APELACION_POR_EXTEMPORANEA'
+  | 'CONCEDE_APELACION';
+
+export enum Variables {
+  NUMERO_RESOLUCION = 'NUMERO_RESOLUCION',
+  FECHA_RESOLUCION = 'FECHA_RESOLUCION',
+  NUMERO_RESOLUCION_RECURSO = 'NUMERO_RESOLUCION_RECURSO',
+  FECHA_RESOLUCION_RECURSO = 'FECHA_RESOLUCION_RECURSO',
+  NOMBRE_APELANTE = 'NOMBRE_APELANTE',
+  NOMBRE_DENUNCIADO = 'NOMBRE_DENUNCIADO',
+  NUMERO_DISPOSICIONMPF = 'NUMERO_DISPOSICIONMPF',
+  NOMBRE_VICTIMA = 'NOMBRE_VICTIMA',
+  FECHA_DISPOSICIONMPF = 'FECHA_DISPOSICIONMPF',
+  FECHA_DENUNCIA = 'FECHA_DENUNCIA',
+  NUMERO_INFORMEPSICOLOGICO = 'NUMERO_INFORMEPSICOLOGICO',
+  NUMERO_INFORMESOCIAL = 'NUMERO_INFORMESOCIAL',
+  FECHA_RECURSO = 'FECHA_RECURSO',
+  PARRAFO_EXTRA = 'PARRAFO_EXTRA',
+}
