@@ -6,5 +6,4 @@ type FieldSchema = { name: string; id: string };
 
 export interface FillNode {
   groups: Array<FieldGroupSchema>;
-  hasGroup: boolean;
 }

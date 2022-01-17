@@ -24,6 +24,7 @@ type Data = {
 
 export type Nodes = {
   next: WayCondtions[];
+  code: number;
   data: Data;
   validatePrevious: Array<WayCondtions & { next: number }> | null;
   finish: WayCondtions | null;
