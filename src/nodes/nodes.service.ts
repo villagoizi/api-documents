@@ -29,11 +29,13 @@ export class NodesService {
       exist ?? (currentTemplate as any),
       info,
     );
-    const templateNode = await this.add({
+    if (exist) {
+      return await this.update({ ...exist, info: linkedGroups as ILinkedNode });
+    }
+    return await this.add({
       ...currentTemplate,
       info: linkedGroups as ILinkedNode,
     });
-    return templateNode;
   }
 
   async add(params: ArgumentTemplate) {
@@ -41,6 +43,19 @@ export class NodesService {
       const create = new this.model(params);
       await create.save();
       return create;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async update(params: Partial<TemplateNode>) {
+    try {
+      const update = await this.model.findOneAndUpdate(
+        { id: (params as any).id },
+        params,
+        { new: true },
+      );
+      return update;
     } catch (error) {
       throw error;
     }
