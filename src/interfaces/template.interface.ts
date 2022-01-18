@@ -1,9 +1,9 @@
 import { FillNode } from './fill-node.type';
-import { LinkedNode } from './linked-node.type';
+import { ILinkedNode } from './linked-node.type';
 
 export type ArgumentTemplate = {
   type: 'linked' | 'fill';
-  arguments: LinkedNode | FillNode;
+  info: ILinkedNode | FillNode;
   template: string; //parent template
 };
 

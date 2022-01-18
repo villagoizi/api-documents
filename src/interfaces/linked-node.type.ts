@@ -1,4 +1,4 @@
-type WayCondtions = {
+export type WayCondtions = {
   code: number;
   condition: boolean;
 };
@@ -30,6 +30,6 @@ export type Nodes = {
   finish: WayCondtions | null;
 };
 
-export interface LinkedNode {
+export interface ILinkedNode {
   groups: Nodes[];
 }

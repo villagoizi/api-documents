@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { GeneralTemplate } from '../../interfaces/template.interface';
-import { LinkedNode } from '../../interfaces/linked-node.type';
+import { ILinkedNode } from '../../interfaces/linked-node.type';
 import { FillNode } from '../../interfaces/fill-node.type';
 
 export type TemplateNodeDocument = TemplateNode & Document;
@@ -26,16 +26,14 @@ export class TemplateNode {
   })
   type: string;
 
-  @Prop([
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Template',
-    },
-  ])
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Template',
+  })
   template: GeneralTemplate;
 
-  @Prop()
-  arguments: LinkedNode | FillNode;
+  @Prop({ default: { groups: [] } })
+  info: ILinkedNode | FillNode;
 }
 
 export const TemplateNodeSchema = SchemaFactory.createForClass(TemplateNode);
