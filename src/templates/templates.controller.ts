@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
+import { AddTemplateNode } from 'src/nodes/dto/add-template-node.dto';
 import { BuildDocumentDto } from './dtos/build-document.dto';
 import { TemplatesService } from './templates.service';
 
@@ -15,5 +16,10 @@ export class TemplatesController {
   @MessagePattern('templates:getAll')
   getAllTemplates() {
     return this.service.getAllTemplates();
+  }
+
+  @MessagePattern('templates:setup')
+  addTemplate(@Body() body: AddTemplateNode) {
+    return this.service.setupTemplate(body);
   }
 }

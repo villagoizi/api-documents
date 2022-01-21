@@ -26,13 +26,16 @@ export class TemplateNode {
   })
   type: string;
 
+  // @Prop({
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: 'Template',
+  // })
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Template',
+    type: String,
   })
   template: GeneralTemplate;
 
-  @Prop({ default: { groups: [] } })
+  @Prop({ default: { groups: [] }, type: mongoose.Schema.Types.Mixed })
   info: ILinkedNode | FillNode;
 }
 

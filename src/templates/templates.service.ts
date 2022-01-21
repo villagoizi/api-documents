@@ -21,6 +21,8 @@ const dirTemplates = path.join(__dirname, '/../../templates');
 const Docxtemplater: any = require('docxtemplater');
 // import Docxtemplater from 'docxtemplater';
 import { UploadService } from '../upload/upload.service';
+import { NodesService } from '../nodes/nodes.service';
+import { AddTemplateNode } from 'src/nodes/dto/add-template-node.dto';
 
 const DIST = path.join(__dirname, `../`);
 const OUTPUT_FOLDER = path.join(__dirname, '../outputs');
@@ -29,7 +31,10 @@ const OUTPUT_FOLDER = path.join(__dirname, '../outputs');
 export class TemplatesService {
   private readonly logger = new Logger(TemplatesService.name);
   private variablesTemplate: Map<TemplatesAvailables, GeneralSchema['groups']>;
-  constructor(private readonly uploaderService: UploadService) {
+  constructor(
+    private readonly uploaderService: UploadService,
+    private readonly nodesService: NodesService,
+  ) {
     this.variablesTemplate = new Map();
     templates.forEach((v) => this.variablesTemplate.set(v.id, v.groups));
   }
@@ -90,6 +95,14 @@ export class TemplatesService {
       acc[v.id] = v.value;
       return acc;
     }, {});
+  }
+
+  async setupTemplate(data: AddTemplateNode) {
+    let result = {};
+    if (data.type === 'linked') {
+      result = await this.nodesService.addLinkedNode(data);
+    }
+    return result;
   }
 
   //   async buildDocument(

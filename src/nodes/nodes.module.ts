@@ -17,5 +17,6 @@ import {
     ]),
   ],
   providers: [NodesService, LinkedNodeService, FillNodeService],
+  exports: [NodesService]
 })
 export class NodesModule {}

@@ -19,13 +19,13 @@ export class NodesService {
 
   async addLinkedNode(data: AddTemplateNode) {
     const { info, template, type } = data;
-    let currentTemplate = {
+    const currentTemplate = {
       info: { groups: [] },
       type,
       template,
     };
     const exist = await this.findByTemplate(template);
-    const linkedGroups = this.linkedService.addBulk(
+    const linkedGroups = this.linkedService.process(
       exist ?? (currentTemplate as any),
       info,
     );

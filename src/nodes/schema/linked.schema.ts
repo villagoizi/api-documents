@@ -1,6 +1,6 @@
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { ILinkedNode } from '../../interfaces/linked-node.type';
+import { Nodes } from '../../interfaces/linked-node.type';
 
 export type LinkedNodeDocument = LinkedNode & Document;
 
@@ -29,7 +29,7 @@ const Node = {
   next: WayConditionsSchema,
   code: { type: Number, required: true },
   validatePrevious: [{ ...WayConditionsSchema, next: Number }],
-  finish: { ...WayConditionsSchema, default: null },
+  finish: { ...WayConditionsSchema },
   data: DataSchema,
 };
 
@@ -44,7 +44,7 @@ const Node = {
 })
 export class LinkedNode {
   @Prop(raw([Node]))
-  groups: ILinkedNode;
+  groups: Nodes[];
 }
 
 export const LinkedNodeSchema = SchemaFactory.createForClass(LinkedNode);

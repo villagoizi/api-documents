@@ -1,30 +1,113 @@
-import { Nodes } from '../../../interfaces/linked-node.type';
-import { CreateDto } from '../../dto/add-linked-node.dto';
+import { Nodes, WayCondtions } from '../../../interfaces/linked-node.type';
 
 export class CustomLinked {
-  data: Array<Nodes> = [];
-  constructor() {}
+  data: Array<Nodes>;
+  mapData: Map<number, Nodes>;
+  constructor() {
+    this.data = [];
+    this.mapData = new Map();
+  }
 
   poblate(data: Array<Nodes> = []) {
-    this.data = data;
+    if (data.length) {
+      this.sort(data, 'asc').forEach((v) => {
+        this.mapData.set(v.code, { ...v });
+      });
+      this.data = [...this.mapData].map(([code, value]) => value);
+    }
+  }
+
+  create(node: Nodes & { prev: WayCondtions[] }) {
+    if (this.exist(node.code))
+      throw new Error(
+        `Code exist, should be unique or the operation should be 'i': ${node.code}`,
+      );
+    if (node?.prev) {
+      this._modifyPrev(node);
+      delete node.prev;
+    }
+    this._setValue(node);
+    return this.mapValues();
+  }
+
+  update(code: number, node: Nodes & { prev: WayCondtions[] }) {
+    if (!this.exist(code)) throw new Error(`Code not found: ${code}`);
+    this._setValue({ ...node, code });
+    return this.mapValues();
+  }
+
+  remove(code: number) {
+    if (!this.exist(code)) throw new Error(`Code not found: ${code}`);
+    const node = this.get(code);
+    const temp: Nodes[] = [];
+    this.data.forEach((v) => {
+      if (v.next) {
+        const has = v.next.find((n) => n.code === node.code);
+        if (has) temp.push(v);
+      }
+    });
+    temp.forEach((v) => {
+      const next = v.next.map((v) => {
+        if (v.code - 1 > 0 && v.code === code) {
+          return { ...v, code: v.code - 1 };
+        }
+        return v;
+      });
+      this.mapData.set(v.code, { ...v, next });
+    });
+    this.mapData.delete(code);
+    return this.mapValues();
+  }
+
+  insert(node: Nodes & { prev: WayCondtions[] }) {
+    this.validatePositions(node);
+    this.findAndModifyNext(node);
+    return this.mapValues();
+  }
+
+  private _setValue(node: (Nodes & { prev: WayCondtions[] }) | Nodes) {
+    if ((node as any)?.prev) {
+      delete (node as any)?.prev;
+    }
+    this.mapData.set(node.code, node);
+  }
+  private _modifyPrev(node: Nodes & { prev: WayCondtions[] }) {
+    node.prev.forEach((v) => {
+      if (!this.exist(v.code)) return;
+      const nodeFound = this.mapData.get(v.code) as Nodes & {
+        prev: WayCondtions[];
+      };
+      const next = nodeFound.next.find((n) => n.condition === v.condition);
+      if (next) {
+        this.update(v.code, {
+          ...nodeFound,
+          next: [
+            ...nodeFound.next.filter((nn) => nn.code !== next.code),
+            { ...next, code: node.code },
+          ],
+        });
+      }
+    });
+  }
+
+  private mapValues() {
+    return this.sort(
+      [...this.mapData.values()].map((value) => {
+        if ((value as any)?.prev) {
+          delete (value as any)?.prev;
+        }
+        return value;
+      }),
+      'asc',
+    );
   }
 
   private exist(code: number) {
-    const index = this.data.findIndex((v) => v.code === code);
-    return index;
-  }
-
-  private update(code: number, node: Nodes) {
-    const index = this.exist(code);
-    if (index === -1) return;
-    this.data = [
-      ...this.data.filter((v) => v.code !== code && v.data !== node.data),
-      node,
-    ];
+    return this.mapData.has(code);
   }
 
   private get(code: number) {
-    return this.data.find((v) => v.code === code);
+    return this.mapData.get(code);
   }
 
   private sort<T = Nodes>(data = [], key = null): T[] {
@@ -32,78 +115,99 @@ export class CustomLinked {
     return data.sort((a, b) => b.code - a.code);
   }
 
-  add(params: CreateDto) {
-    let { prev, next, code } = params;
-    this.validatePositions(params);
-    if (this.exist(code) > -1) {
-      const node = this.get(code);
-      //First position
-      if (!prev && next) {
-        this.findAndModifyNext(node);
-      }
-      //Between position
-      if (prev && next) {
-        this.findAndModifyPrev(node, prev);
-      }
-    }
-    this.insert(params);
-    return this.data;
-  }
-
-  private insert(node) {
-    this.data.push(node);
-  }
-
   private validatePositions(params) {
     const { prev, next } = params;
-    if (!prev && !next)
+
+    if (!prev && !next && this.data.length)
       throw new Error(
         'Invalid positions, it should have a prev or next values',
       );
   }
 
-  private regretion(nodes: Nodes['next'], currentNode = null) {
-    const temp = [];
-    if (currentNode) {
-      temp.push(currentNode);
+  private findAndModifyNext(node: Nodes & { prev: WayCondtions[] }) {
+    const nodesIncrease = this.regretion(node);
+    if (nodesIncrease.length) {
+      nodesIncrease.forEach((v) => {
+        this.mapData.set(v.new.code, v.new);
+        this.modifyNext(v.old, v.new);
+        this.modifyPrevious(v.old, v.new);
+      });
     }
-    nodes.forEach((v) => {
-      const nextNode = this.get(v.code);
-      if (!nextNode) return temp;
-      if (temp.find((t) => t.code == nextNode.code)) return temp;
-      temp.push(nextNode);
-      if (nextNode.next?.length) {
-        return this.regretion(nextNode.next);
-      }
+    this._setValue(node);
+  }
+  private regretion(node: Nodes): Array<{ old: Nodes; new: Nodes }> {
+    const temp: Array<{ old: Nodes; new: Nodes }> = [];
+    if (!this.exist(node.code)) return temp;
+    const nodeToModify = this.get(node.code);
+    temp.push({
+      old: nodeToModify,
+      new: { ...nodeToModify, code: nodeToModify.code + 1 },
     });
+    if (this.exist(nodeToModify.code + 1))
+      return this.regretion(this.get(nodeToModify.code + 1));
     return temp;
   }
 
-  private findAndModifyNext(node: Nodes) {
-    const nodes = this.regretion(node.next, node);
-    const sort = this.sort(nodes);
-    sort.forEach((v) => {
-      this.update(v.code, {
-        ...v,
-        code: v.code + 1,
-        next: v.next ? v.next.map((n) => ({ ...n, code: n.code + 1 })) : null,
-        validatePrevious: this.modifyPrevious(sort, v.code),
+  private modifyNext(oldNode: Nodes, newNode: Nodes) {
+    const currentNodes = this.mapValues();
+    currentNodes.forEach((v) => {
+      this._forEachNext(v, { oldNode, newNode });
+    });
+  }
+
+  private modifyPrevious(oldNode: Nodes, newNode: Nodes) {
+    const currentNodes = this.mapValues();
+    currentNodes.forEach((v) => {
+      this._forEachPrevious(v, { oldNode, newNode });
+    });
+  }
+
+  private _forEachNext(
+    node: Nodes,
+    values: { oldNode: Nodes; newNode: Nodes },
+  ) {
+    if (!node.next) return;
+    const { oldNode, newNode } = values;
+    const nextFound = node.next.find((nn) => nn.code === oldNode.code);
+    if (nextFound) {
+      this.mapData.set(node.code, {
+        ...node,
+        next: [
+          ...node.next.filter((nn) => nn.code !== oldNode.code),
+          { ...nextFound, code: newNode.code },
+        ],
       });
-    });
+    }
   }
-
-  private findAndModifyPrev(node: Nodes, prev: CreateDto['prev']) {
-    const replaceNode = this.get(node.code - 1);
-    replaceNode.next = prev;
-    this.findAndModifyNext(node);
-  }
-
-  private modifyPrevious(modify: Nodes[], code: number) {
-    const exist = modify.find((v) => v.code === code);
-    if (!exist) return null;
-    return exist.validatePrevious.map((v) => {
-      if (v.code === code) return { ...v, code: v.code + 1 };
-      return v;
-    });
+  private _forEachPrevious(
+    node: Nodes,
+    values: { oldNode: Nodes; newNode: Nodes },
+  ) {
+    if (!node.validatePrevious) return;
+    const { oldNode, newNode } = values;
+    const validateFound = node.validatePrevious.find(
+      (p) => p.code === oldNode.code,
+    );
+    if (validateFound) {
+      this.mapData.set(node.code, {
+        ...node,
+        validatePrevious: [
+          ...node.validatePrevious.filter((nn) => nn.code !== oldNode.code),
+          { ...validateFound, code: newNode.code },
+        ],
+      });
+    }
+    const nextFound = node.validatePrevious.find(
+      (p) => p.next === oldNode.code,
+    );
+    if (nextFound) {
+      this.mapData.set(node.code, {
+        ...node,
+        validatePrevious: [
+          ...node.validatePrevious.filter((nn) => nn.next !== oldNode.code),
+          { ...validateFound, next: newNode.code },
+        ],
+      });
+    }
   }
 }
