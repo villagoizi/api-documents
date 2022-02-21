@@ -125,7 +125,8 @@ export class CustomLinked {
   }
 
   private findAndModifyNext(node: Nodes & { prev: WayCondtions[] }) {
-    const nodesIncrease = this.regretion(node);
+    const temp: Array<{ old: Nodes; new: Nodes }> = [];
+    const nodesIncrease = this.regretion(node, temp);
     if (nodesIncrease.length) {
       nodesIncrease.forEach((v) => {
         this.mapData.set(v.new.code, v.new);
@@ -135,8 +136,10 @@ export class CustomLinked {
     }
     this._setValue(node);
   }
-  private regretion(node: Nodes): Array<{ old: Nodes; new: Nodes }> {
-    const temp: Array<{ old: Nodes; new: Nodes }> = [];
+  private regretion(
+    node: Nodes,
+    temp: Array<{ old: Nodes; new: Nodes }> = [],
+  ): Array<{ old: Nodes; new: Nodes }> {
     if (!this.exist(node.code)) return temp;
     const nodeToModify = this.get(node.code);
     temp.push({
@@ -144,7 +147,7 @@ export class CustomLinked {
       new: { ...nodeToModify, code: nodeToModify.code + 1 },
     });
     if (this.exist(nodeToModify.code + 1))
-      return this.regretion(this.get(nodeToModify.code + 1));
+      return this.regretion(this.get(nodeToModify.code + 1), temp);
     return temp;
   }
 

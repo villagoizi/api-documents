@@ -9,7 +9,18 @@ import {
 import { TemplateNode } from '../../schema/template-nodes.schema';
 import { Nodes } from '../../../interfaces/linked-node.type';
 import { CustomLinked } from './custom-linked.class';
-import { CreateDto } from '../../dto/add-linked-node.dto';
+import { CreateLinkDto } from '../../dto/add-linked-node.dto';
+
+type Priority = {
+  [key in 'c' | 'u' | 'i' | 'r']: {
+    process: Array<
+      Nodes & {
+        prev: WayCondtions[] | null;
+      }
+    >;
+    p: number;
+  };
+};
 
 @Injectable()
 export class LinkedNodeService {
@@ -18,8 +29,8 @@ export class LinkedNodeService {
     @InjectModel(LinkedNode.name) private model: Model<LinkedNodeDocument>,
   ) {}
 
-  process(template: TemplateNode, params: CreateDto[] | CreateDto) {
-    const priority = {
+  process(template: TemplateNode, params: CreateLinkDto[] | CreateLinkDto) {
+    const priority: Priority = {
       c: {
         process: [],
         p: 1,
@@ -40,33 +51,37 @@ export class LinkedNodeService {
     const instance = new CustomLinked();
     instance.poblate(template.info.groups as Nodes[]);
     console.log(instance.mapData, 'CURRENT GROUP');
-    const temp = template;
-    if (Array.isArray(params)) {
+    const temp = Object.assign({}, template);
+    const isListParams = Array.isArray(params);
+    if (isListParams) {
       params.forEach((v) => {
         this._setPriority(priority, v.operation, v.data);
       });
-      Object.values(priority)
-        .sort((a, b) => a.p - b.p)
-        .forEach((v) => {
-          (temp.info as any).groups = this._processGroups(
-            v,
-            instance,
-            template.info.groups as Nodes[],
-          );
-        });
     } else {
-      priority[params.operation].process.push(params.data);
-      (temp.info as any).groups = this._processGroups(
-        priority[params.operation],
-        instance,
-        template.info.groups as Nodes[],
-      );
+      this._setPriority(priority, params.operation, params.data);
     }
+    Object.values(priority)
+      .sort((a, b) => a.p - b.p)
+      .forEach((v) => {
+        temp.info.groups = this._processGroups(
+          v,
+          instance,
+          template.info.groups as Nodes[],
+        );
+      });
+
     return { groups: temp.info.groups };
   }
 
   private _processGroups(
-    v: { p: number; process: Array<Nodes & { prev: WayCondtions[] }> },
+    v: {
+      process: Array<
+        Nodes & {
+          prev: WayCondtions[] | null;
+        }
+      >;
+      p: number;
+    },
     instance: CustomLinked,
     initialGroup: Nodes[],
   ) {
@@ -86,16 +101,16 @@ export class LinkedNodeService {
     return groups;
   }
 
-  private _setPriority(priority, operation, data) {
-    if (priority[operation].length) {
-      Array.isArray(data)
-        ? (priority[operation].process = [
-            ...priority[operation].process,
-            ...data,
-          ])
-        : [...priority[operation].process, data];
+  private _setPriority(
+    priority: Priority,
+    operation: CreateLinkDto['operation'],
+    data: CreateLinkDto['data'],
+  ) {
+    if (Array.isArray(data)) {
+      priority[operation].process = [...priority[operation].process, ...data];
       return;
     }
-    priority[operation].process = Array.isArray(data) ? data : [data];
+    priority[operation].process.push(data);
+    return;
   }
 }

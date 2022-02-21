@@ -1,11 +1,7 @@
-import {
-  Variables,
-  TemplatesAvailables,
-} from '../../interfaces/document.request';
-export type BuildDocumentVariables = { id: Variables; value: string };
+export type BuildDocumentVariables = { uid: string; value: string };
 
 export interface BuildDocumentDto {
-  template: TemplatesAvailables;
+  template: string;
   variables: Array<BuildDocumentVariables>;
   hash: string;
 }

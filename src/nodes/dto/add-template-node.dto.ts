@@ -1,7 +1,14 @@
-import { CreateDto } from './add-linked-node.dto';
+import { CreateFillDto } from './add-fill-node.dto';
+import { CreateLinkDto } from './add-linked-node.dto';
+
+type InfoTemplateNode =
+  | CreateLinkDto[]
+  | CreateLinkDto
+  | CreateFillDto[]
+  | CreateFillDto;
 
 export type AddTemplateNode = {
   type: 'linked' | 'fill';
-  info: CreateDto[];
+  info: InfoTemplateNode;
   template: string; //parent template
 };

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ArgumentTemplate } from '../interfaces/template.interface';
+import { IArgumentTemplate } from '../interfaces/template.interface';
 import {
   TemplateNode,
   TemplateNodeDocument,
@@ -9,12 +9,16 @@ import { Model } from 'mongoose';
 import { LinkedNodeService } from './providers/linked-node/linked-node.service';
 import { AddTemplateNode } from './dto/add-template-node.dto';
 import { ILinkedNode } from '../interfaces/linked-node.type';
+import { FillNodeService } from './providers/fill-node/fill-node.service';
+import { CreateLinkDto } from './dto/add-linked-node.dto';
+import { CreateFillDto } from './dto/add-fill-node.dto';
 
 @Injectable()
 export class NodesService {
   constructor(
     @InjectModel(TemplateNode.name) private model: Model<TemplateNodeDocument>,
     private readonly linkedService: LinkedNodeService,
+    private readonly fillService: FillNodeService,
   ) {}
 
   async addLinkedNode(data: AddTemplateNode) {
@@ -27,7 +31,7 @@ export class NodesService {
     const exist = await this.findByTemplate(template);
     const linkedGroups = this.linkedService.process(
       exist ?? (currentTemplate as any),
-      info,
+      info as CreateLinkDto | CreateLinkDto[],
     );
     if (exist) {
       return await this.update({ ...exist, info: linkedGroups as ILinkedNode });
@@ -38,7 +42,25 @@ export class NodesService {
     });
   }
 
-  async add(params: ArgumentTemplate) {
+  async addFillNode(data: AddTemplateNode) {
+    const { info, template, type } = data;
+    const currentTemplate = {
+      info: { groups: [] },
+      type,
+      template,
+    };
+    const exist = await this.findByTemplate(template);
+    const fillGroups = this.fillService.process(info as CreateFillDto);
+    if (exist) {
+      return await this.update({ ...exist, info: fillGroups });
+    }
+    return await this.add({
+      ...currentTemplate,
+      info: fillGroups,
+    });
+  }
+
+  async add(params: IArgumentTemplate) {
     try {
       const create = new this.model(params);
       await create.save();

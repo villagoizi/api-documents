@@ -1,5 +1,5 @@
 import { Nodes, WayCondtions } from '../../interfaces/linked-node.type';
-export type CreateDto = {
+export type CreateLinkDto = {
   data:
     | Array<
         Nodes & {
@@ -11,5 +11,3 @@ export type CreateDto = {
       });
   operation: 'u' | 'i' | 'c' | 'r';
 };
-
-export type AddQuestions = { template: string; params: CreateDto };

@@ -1,8 +1,8 @@
-type FieldGroupSchema = {
+export type FieldGroupSchema = {
   title: string;
   fields: Array<FieldSchema>;
 };
-type FieldSchema = { name: string; id: string };
+export type FieldSchema = { name: string; uid: string };
 
 export interface FillNode {
   groups: Array<FieldGroupSchema>;
