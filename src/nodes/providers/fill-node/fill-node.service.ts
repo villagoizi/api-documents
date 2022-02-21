@@ -15,7 +15,6 @@ export class FillNodeService {
     const values: Array<FieldGroupSchema> = [];
     data.forEach((v) => {
       v.fields.forEach((f) => {
-        const protoObject = Object.assign({}, f);
         if (this._hasOwnProperty(v, 'uid') && !!f.uid) {
           values.push(v);
         }

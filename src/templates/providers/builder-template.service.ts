@@ -3,7 +3,9 @@ import * as pizzip from 'pizzip';
 import { BuildDocumentDto } from '../dtos/build-document.dto';
 import { GeneralTemplate } from '../schema/template.schema';
 import { TemplatesFileSystemService } from './templates-fs.service';
-const Docxtemplater: any = require('docxtemplater');
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-ignore
+const Docxtemplater = require('docxtemplater');
 
 @Injectable()
 export class BuildDocumentService {
@@ -47,7 +49,7 @@ export class BuildDocumentService {
     const keys = variables.map((v) => v.uid);
     schema.globalVariables.forEach((g) => {
       if (!keys.includes(g)) {
-        throw new Error(`Invalid variable ${JSON.stringify(v)}`);
+        throw new Error(`Invalid variable ${JSON.stringify(g)}`);
       }
       variables.forEach((v) => {
         !v[g]

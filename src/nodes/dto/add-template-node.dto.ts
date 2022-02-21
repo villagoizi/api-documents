@@ -1,11 +1,7 @@
 import { CreateFillDto } from './add-fill-node.dto';
 import { CreateLinkDto } from './add-linked-node.dto';
 
-type InfoTemplateNode =
-  | CreateLinkDto[]
-  | CreateLinkDto
-  | CreateFillDto[]
-  | CreateFillDto;
+type InfoTemplateNode = CreateLinkDto[] | CreateLinkDto | CreateFillDto;
 
 export type AddTemplateNode = {
   type: 'linked' | 'fill';

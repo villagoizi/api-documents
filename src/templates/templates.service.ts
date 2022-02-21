@@ -108,7 +108,7 @@ export class TemplatesService {
     try {
       const found = await this.schema.findOne({ _id: id });
       if (!found && launcException) {
-        throw new Error("Template doesn's exist");
+        throw new Error("Template doesn't exist");
       }
       return found;
     } catch (error) {
